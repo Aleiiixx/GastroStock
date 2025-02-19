@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@100;200;300;400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'Manrope', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #F7F4E9;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Colores primarios */
+  --color-primary: #007bff;
+  --color-primary-light: #66b2ff; 
+  --color-primary-dark: #0056b3;
+}
+
+body {
+  margin: 5% 10%;
+  padding: 0;
+  height: 100vh;
+  overflow-y: hidden;
+}
+
+@media (max-width: 1200px) {
+  body {
+    margin: 1% 8%;
+  }
+}
+
+@media (max-width: 992px) {
+  body {
+    margin: 1% 5%;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    margin: 1% 2%;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    margin: 0;
+  }
+}
+
