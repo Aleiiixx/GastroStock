@@ -1,29 +1,37 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/users');
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/users");
 
 exports.register = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { restaurantName, email, password } = req.body;
 
         // Verifica si el usuario ya existe
         const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: 'User already exists' });
+        if (existingUser) return res.status(400).json({ message: "User already exists" });
 
         // Hash de la contraseña
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Crear usuario
-        const newUser = new User({ username, email, password: hashedPassword });
+        const newUser = new User({ restaurantName, email, password: hashedPassword });
         await newUser.save();
 
-        res.status(201).json({ message: 'User registered successfully' });
+        // 🔥 Generar el token JWT
+        const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+        // Enviar respuesta con el token y datos del usuario
+        res.status(201).json({ 
+            message: "User registered successfully",
+            token,
+            user: { id: newUser._id, restaurantName: newUser.restaurantName, email: newUser.email }
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
-}
+};
+
 
 exports.login = async (req, res) => {
   try {

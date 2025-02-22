@@ -8,10 +8,13 @@ import {
   InputAdornment,
   IconButton,
   Link,
-  Divider
+  Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import styles from "./Login.module.css";
 
 const Login: React.FC = () => {
@@ -19,10 +22,12 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Función para validar el email
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -31,23 +36,48 @@ const Login: React.FC = () => {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
     setEmail(newEmail);
-
-    if (!validateEmail(newEmail)) {
-      setEmailError("Invalid email format");
-    } else {
-      setEmailError("");
-    }
+    setEmailError(validateEmail(newEmail) ? "" : "Invalid email format");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateEmail(email)) {
-      setEmailError("Invalid email format");
+      toast.error("Invalid email format");
       return;
     }
 
-    console.log("Login with", { email, password });
+    if (password.trim().length < 6) {
+      setPasswordError("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Authentication failed");
+      }
+
+      toast.success("Login successful!");
+      login(data.token);
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message || "Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   return (
@@ -57,6 +87,7 @@ const Login: React.FC = () => {
           <Typography variant="h5" className={styles.title}>
             LOGIN
           </Typography>
+
           <form onSubmit={handleSubmit} className={styles.form}>
             <TextField
               label="Email"
@@ -68,14 +99,12 @@ const Login: React.FC = () => {
               onChange={handleEmailChange}
               error={!!emailError}
               helperText={emailError}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email />
-                    </InputAdornment>
-                  ),
-                },
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email />
+                  </InputAdornment>
+                ),
               }}
             />
             <TextField
@@ -86,35 +115,35 @@ const Login: React.FC = () => {
               className={styles.input}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
+              error={!!passwordError}
+              helperText={passwordError}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
             <Link className={styles.forgotPassword} onClick={() => navigate("/")}>
               Forgot Password?
             </Link>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              color="primary" 
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
               className={styles.button}
               sx={{ mt: 4 }}
-              disabled={!!emailError || !email.trim()} // Deshabilita si el email no es válido o está vacío
+              disabled={!!emailError || !email.trim() || loading}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </Button>
 
             <Divider className={styles.divider}>OR</Divider>

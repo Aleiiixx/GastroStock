@@ -1,85 +1,56 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home/Home';
-import Scan from './pages/Scan/Scan/Scan';
-import useScanningStore from './store/scanningStore';
-import { toast } from 'react-toastify';
-import Login from './pages/Auth/Login/Login';
-import SignUp from './pages/Auth/SignUp/SignUp';
-import ModalComponent from './components/Modal/Modal';
+import React, { useEffect } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+
+import ProtectedRoute from "./routes/ProtectedRoutes";
+import Home from "./pages/Home/Home";
+import Scan from "./pages/Scan/Scan/Scan";
+import useScanningStore from "./store/scanningStore";
+import Login from "./pages/Auth/Login/Login";
+import SignUp from "./pages/Auth/SignUp/SignUp";
+import ModalComponent from "./components/Modal/Modal";
+import Suppliers from "./pages/Suppliers/Suppliers";
+import Statistics from "./pages/Statistics/Statistics";
+import Profile from "./pages/Profile/Profile";
+import Storage from "./pages/Storage/Storage";
 
 const AppRouter: React.FC = () => {
-    const { scanning, enableScanning, setScannedCode } = useScanningStore();
-    const barcodeRef = useRef('');
-    const lastScanTime = useRef<number>(0);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    let timer: ReturnType<typeof setTimeout>;
+    const { scanning, enableScanning } = useScanningStore();
+    const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
-        if (scanning) {
-            setIsModalOpen(true);
-        } else {
-            setIsModalOpen(false)
+        // 🔥 Evitar redirigir a login si estamos en rutas públicas como /signup
+        if (!isAuthenticated && location.pathname !== "/signup") {
+            console.warn("❌ Usuario no autenticado, redirigiendo a login...");
+            navigate("/login", { replace: true });
         }
-    }, [scanning]);
-
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            const currentTime = Date.now();
-            const timeDiff = currentTime - lastScanTime.current;
-
-            if (timeDiff > 1000) {
-                barcodeRef.current = '';
-            }
-
-            lastScanTime.current = currentTime;
-
-            if (event.key === 'Enter' && barcodeRef.current.length >= 6) {
-                console.log("Código escaneado:", barcodeRef.current);
-                setScannedCode(barcodeRef.current);
-                toast.success("Scanning code", {
-                    autoClose: 500
-                });
-                enableScanning();
-                barcodeRef.current = '';
-            } else if (/^[a-zA-Z0-9]$/.test(event.key)) {
-                barcodeRef.current += event.key;
-                clearTimeout(timer);
-                timer = setTimeout(() => {
-                    barcodeRef.current = '';
-                }, 200);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-            clearTimeout(timer);
-        };
-    }, [enableScanning, setScannedCode]);
+    }, [isAuthenticated, navigate, location.pathname]);
 
     return (
         <>
             <Routes>
-                <Route path="/" element={<Home />} />
+                {/* Rutas públicas */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
-                <Route path="/suppliers" element={<SignUp />} />
-                <Route path="/storage" element={<SignUp />} />
-                <Route path="/statistics" element={<SignUp />} />
-                <Route path="/profile" element={<SignUp />} />
+
+                {/* Rutas protegidas */}
+                <Route element={<ProtectedRoute />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/suppliers" element={<Suppliers />} />
+                    <Route path="/storage" element={<Storage />} />
+                    <Route path="/statistics" element={<Statistics />} />
+                    <Route path="/profile" element={<Profile />} />
+                </Route>
             </Routes>
-            <ModalComponent open={isModalOpen} onClose={() => setIsModalOpen(false)} adaptToScreen>
+            
+            {/* Modal para escaneo */}
+            <ModalComponent open={scanning} onClose={() => enableScanning()} adaptToScreen>
                 <Scan />
             </ModalComponent>
         </>
     );
 };
 
-const AppWrapper: React.FC = () => (
-    <Router>
-        <AppRouter />
-    </Router>
-);
-
-export default AppWrapper;
+export default AppRouter;

@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
-import useDatabaseStore from '../src/store/databaseStore';
+import useDatabaseStore from '../store/databaseStore';
 
-// Definimos el tipo de los mensajes que recibimos del WebSocket
+// 📡 Definir a qué canales nos queremos suscribir
+const SUBSCRIPTION_CHANNELS = ['PRODUCTS_AND_STOCK'];
+
 interface WebSocketMessage {
   type: string;
   collection?: string;
@@ -14,25 +16,14 @@ const useWebSocket = () => {
   useEffect(() => {
     let ws: WebSocket;
 
-    const fetchInitialData = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/initial-data'); // Ajusta la URL según tu backend
-        const initialData = await response.json();
-        console.log('📦 Datos iniciales:', initialData);
-
-        // Guardamos los datos iniciales en Zustand
-        setData(initialData);
-      } catch (error) {
-        console.error('❌ Error obteniendo datos iniciales:', error);
-      }
-    };
-
     const connectWebSocket = () => {
       ws = new WebSocket('ws://localhost:3000');
 
-      ws.onopen = async () => {
+      ws.onopen = () => {
         console.log('✅ WebSocket conectado');
-        await fetchInitialData();
+
+        // 🔥 Enviar suscripción a los canales
+        ws.send(JSON.stringify({ type: 'subscribe', channels: SUBSCRIPTION_CHANNELS }));
       };
 
       ws.onmessage = (event: MessageEvent) => {

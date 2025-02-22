@@ -10,10 +10,10 @@ const watchDatabase = async () => {
 
   console.log('📡 Escuchando cambios en TODAS las colecciones de la base de datos...');
 
-  const changeStream = db.watch(); // 🔥 Ahora escucha todas las colecciones
+  const changeStream = db.watch();
 
   changeStream.on('change', (change) => {
-    console.log('🔄 Cambio detectado en la base de datos:', change);
+    console.log(`🔄 Cambio en la colección: ${change.ns.coll}`);
     broadcast({ type: 'dbUpdate', collection: change.ns.coll, data: change });
   });
 };

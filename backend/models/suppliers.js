@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const SupplierSchema = new mongoose.Schema(
     {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User', // Relación con el modelo User
+            required: true,
+        },
         representativeName: {
             type: String,
             required: false,
@@ -27,7 +32,8 @@ const SupplierSchema = new mongoose.Schema(
     }
 );
 
-SupplierSchema.pre('validate', (next) => {
+// 🔍 Validación: Se debe proporcionar al menos `email` o `phone`
+SupplierSchema.pre('validate', function (next) {
     if (!this.email && !this.phone) {
         const error = new Error('Either email or phone must be provided.');
         error.name = 'ValidationError';
