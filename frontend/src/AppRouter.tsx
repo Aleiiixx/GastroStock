@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/useAuth";
 
 import ProtectedRoute from "./routes/ProtectedRoutes";
 import Home from "./pages/Home/Home";
@@ -21,7 +21,6 @@ const AppRouter: React.FC = () => {
     const location = useLocation();
 
     useEffect(() => {
-        // 🔥 Evitar redirigir a login si estamos en rutas públicas como /signup
         if (!isAuthenticated && location.pathname !== "/signup") {
             console.warn("❌ Usuario no autenticado, redirigiendo a login...");
             navigate("/login", { replace: true });

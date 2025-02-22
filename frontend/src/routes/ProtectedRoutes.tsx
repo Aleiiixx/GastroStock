@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 const ProtectedRoute = () => {
   const { isAuthenticated } = useAuth();
@@ -13,7 +13,7 @@ const ProtectedRoute = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  if (!isAuthenticated) return null; // Evita que la ruta protegida se renderice
+  if (!isAuthenticated) return null;
 
   return <Outlet />;
 };
