@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import useScanningStore from '../store/scanningStore';
+import useScanningStore from '../../../store/scanningStore';
 
 const Scan: React.FC = () => {
     const { scanning, disableScanning, disableScanningAndClearStore, scannedCodesStore } = useScanningStore();

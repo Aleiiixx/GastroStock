@@ -21,7 +21,6 @@
 }
 
 body {
-  margin: 5% 10%;
   padding: 0;
   height: 100vh;
   overflow-y: hidden;
@@ -29,7 +28,7 @@ body {
 
 @media (max-width: 1200px) {
   body {
-    margin: 1% 8%;
+    margin-bottom: 1%;
   }
 }
 

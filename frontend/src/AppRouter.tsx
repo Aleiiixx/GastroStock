@@ -1,23 +1,27 @@
-import React, { useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home/Home';
-import Scan from './pages/Scan';
+import Scan from './pages/Scan/Scan/Scan';
 import useScanningStore from './store/scanningStore';
 import { toast } from 'react-toastify';
-import Login from './pages/Login/Login';
+import Login from './pages/Auth/Login/Login';
+import SignUp from './pages/Auth/SignUp/SignUp';
+import ModalComponent from './components/Modal/Modal';
 
 const AppRouter: React.FC = () => {
     const { scanning, enableScanning, setScannedCode } = useScanningStore();
-    const navigate = useNavigate();
     const barcodeRef = useRef('');
     const lastScanTime = useRef<number>(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     let timer: ReturnType<typeof setTimeout>;
 
     useEffect(() => {
         if (scanning) {
-            navigate('/scan');
+            setIsModalOpen(true);
+        } else {
+            setIsModalOpen(false)
         }
-    }, [scanning, navigate]);
+    }, [scanning]);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -55,11 +59,20 @@ const AppRouter: React.FC = () => {
     }, [enableScanning, setScannedCode]);
 
     return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/scan" element={<Scan />} />
-            <Route path="/login" element={<Login />} />
-        </Routes>
+        <>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/suppliers" element={<SignUp />} />
+                <Route path="/storage" element={<SignUp />} />
+                <Route path="/statistics" element={<SignUp />} />
+                <Route path="/profile" element={<SignUp />} />
+            </Routes>
+            <ModalComponent open={isModalOpen} onClose={() => setIsModalOpen(false)} adaptToScreen>
+                <Scan />
+            </ModalComponent>
+        </>
     );
 };
 

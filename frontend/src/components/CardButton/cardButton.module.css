@@ -27,3 +27,11 @@
 .CardButtonContainer h1{
     font-weight: 800;
 }
+
+@media (max-width: 1200px) {
+    .CardButtonContainer h1{
+        font-weight: 800;
+        text-align: center;
+    }
+}
+

@@ -1,21 +1,31 @@
 .homeMainContianer{
     width: 100%;
-    height: 100%;
+    height: 98vh;
     display: flex;
     flex-direction: row;
-    gap: 16px;
+    gap: 12px;
+    padding-bottom: 8px;
 }
 
 .leftContainer{
-    height: 80vh;
+    height: 100%;
     width: 33%;
 }
 
 .rightContainer{
-    height: 80vh;
+    height: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 10px;
     width: 66%;
 }
+
+
+@media (max-width: 1200px) {
+    .homeMainContianer{
+        gap: 8px;
+    }
+    
+}
+  
